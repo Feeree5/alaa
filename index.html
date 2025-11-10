@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<script src="script.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>نظام السحب الذكي</title>
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: "Cairo", sans-serif;
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+  .container {
+    backdrop-filter: blur(12px) saturate(180%);
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 30px;
+    width: 90%;
+    max-width: 420px;
+    box-shadow: 0 0 30px rgba(0,0,0,0.3);
+    text-align: center;
+  }
+  h1 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #00e6e6;
+  }
+  input {
+    width: 80%;
+    padding: 10px;
+    margin: 10px 0;
+    border: none;
+    border-radius: 10px;
+    text-align: center;
+    font-size: 16px;
+  }
+  button {
+    width: 85%;
+    padding: 12px;
+    margin: 8px 0;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(90deg, #00c6ff, #0072ff);
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+  button:hover {
+    background: linear-gradient(90deg, #0072ff, #00c6ff);
+    transform: scale(1.03);
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+  }
+  th, td {
+    border: 1px solid rgba(255,255,255,0.2);
+    padding: 8px;
+    font-size: 14px;
+  }
+  th { color: #00ffff; }
+  #logTable { display: none; }
+.img1{
+     whidth:80px;
+     height: 80px; 
+ }
+
+.img2{
+     whidth:80px;
+     height: 80px; 
+ }
+
+
+</style>
+</head>
+<body>
+
+
+
+
+<div class="container">
+  <marquee direction="right">
+  <img src="image2.png" class="img2">
+  <img src="image1.png" class="img1">
+ </marquee>
+
+
+  <h2>المخزون الحالي: <span id="stock">--</span></h2>
+
+  <input id="amount" type="number" placeholder="عدد الأرغفة">
+  <button onclick="withdraw()">سحب</button>
+
+  <input id="resetValue" type="number" placeholder="تعيين نسبة جديدة">
+  <button onclick="resetStock()">إعادة التعيين</button>
+
+  <button onclick="showLog()">📜 السجل</button>
+
+  <div id="logTable"></div>
+</div>
+
+
+
+<script>
+const scriptURL = "https://script.google.com/macros/s/AKfycbyOdAnRJaA0_RRvlx5Xsz6FX3eFjeDK7UTnb7HE9bYA2dIr6K-DcXGH6XM8DK4yQrUR7Q/exec";
+
+let stock = 0;
+let logs = [];
+
+async function loadData() {
+  const res = await fetch(`${scriptURL}?action=read`);
+  const text = await res.text();
+  const lines = text.trim().split("\n");
+  stock = parseInt(lines[0]) || 0;
+  logs = lines.slice(1);
+  document.getElementById("stock").innerText = stock;
+}
+
+async function saveData() {
+  const data = [stock, ...logs].join("\n");
+  await fetch(`${scriptURL}?action=write&data=${encodeURIComponent(data)}`);
+}
+
+async function withdraw() {
+  const val = parseInt(document.getElementById("amount").value);
+  if (!val || val <= 0) return alert("أدخل عدد الأرغفة أولاً");
+  if (val > stock) return alert("المخزون غير كافٍ");
+
+  stock -= val;
+  const now = new Date().toLocaleString("ar-EG");
+  logs.push(`${val} رغيف - ${now}`);
+  await saveData();
+  document.getElementById("stock").innerText = stock;
+  document.getElementById("amount").value = "";
+  alert("تم السحب وتحديث السجل ✅");
+}
+
+async function resetStock() {
+  const val = parseInt(document.getElementById("resetValue").value);
+  if (!val || val < 0) return alert("أدخل قيمة صحيحة");
+  stock = val;
+  await saveData();
+  document.getElementById("stock").innerText = stock;
+  alert("تم إعادة تعيين المخزون ✅");
+}
+
+function showLog() {
+  const div = document.getElementById("logTable");
+  if (div.style.display === "block") {
+    div.style.display = "none";
+    return;
+  }
+  let html = "<table><tr><th>العملية</th></tr>";
+  logs.forEach(l => html += `<tr><td>${l}</td></tr>`);
+  html += "</table>";
+  div.innerHTML = html;
+  div.style.display = "block";
+}
+
+loadData();
+</script>
+
+</body>
+</html>

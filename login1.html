@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تسجيل الدخول بالذكاء الاصطناعي</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap');
+body {
+  margin:0; font-family:'Tajawal',sans-serif; background:linear-gradient(135deg,#1e3c72,#2a5298);
+  display:flex; justify-content:center; align-items:center; height:100vh; color:#fff; overflow:hidden;
+}
+.container {
+  width:350px; padding:40px; background:rgba(255,255,255,0.1);
+  backdrop-filter:blur(20px); border-radius:16px; box-shadow:0 0 40px rgba(0,0,0,0.3);
+  text-align:center; animation: float 6s ease-in-out infinite;
+}
+@keyframes float { 0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)} }
+h2 { margin-bottom:20px; font-weight:700; font-size:24px; }
+input {
+  width:100%; padding:12px; margin:8px 0; border:none; border-radius:8px;
+  outline:none; background:rgba(255,255,255,0.2); color:#fff; font-size:16px;
+}
+input::placeholder { color:#ddd; }
+button {
+  width:100%; padding:12px; background:#00c6ff; border:none; border-radius:8px;
+  font-size:18px; color:#fff; cursor:pointer; transition:0.3s;
+}
+button:hover { background:#0072ff; transform:scale(1.03); }
+.error { margin-top:10px; color:#ff6b6b; font-size:14px; display:none; }
+.ai-balls span {
+  position:absolute; border-radius:50%; opacity:0.6; animation:move 10s linear infinite;
+}
+@keyframes move {
+  0% {transform:translate(0,0) scale(1);}
+  50% {transform:translate(200px,-200px) scale(1.2);}
+  100% {transform:translate(0,0) scale(1);}
+}
+</style>
+</head>
+<body>
+<div class="ai-balls">
+  <span style="width:120px;height:120px;top:20%;left:10%;background:#00c6ff;"></span>
+  <span style="width:80px;height:80px;bottom:15%;right:10%;background:#0072ff;"></span>
+  <span style="width:100px;height:100px;bottom:25%;left:20%;background:#6a11cb;"></span>
+</div>
+
+<div class="container">
+  <h2>تسجيل الدخول 🤖</h2>
+  <input type="text" id="username" placeholder="اسم المستخدم">
+  <input type="password" id="password" placeholder="كلمة المرور">
+ <button id="loginBtn">دخول</button>
+  <div id="error" class="error"></div>
+</div>
+
+<script>
+const FILE_ID = "14I-qzV7UykxWiZVyb3rnd-YM8kd6sA7p";
+const FILE_URL = `https://www.googleapis.com/drive/v3/files/${FILE_ID}?alt=media&key=AIzaSyAQSQEankdd5aGSnbcbpLfPI7hW4n082FU`;
+
+document.getElementById("loginBtn").addEventListener("click", async () => {
+  const user = document.getElementById("username").value.trim();
+  const pass = document.getElementById("password").value.trim();
+  const err = document.getElementById("error");
+
+  if (!user || !pass) {
+    err.style.display = "block";
+    err.textContent = "يرجى إدخال جميع الحقول";
+    return;
+  }
+
+  err.style.display = "block";
+  err.textContent = " ⏳ جاري التحقق...";
+
+  try {
+    const res = await fetch(FILE_URL);
+    if (!res.ok) throw new Error("فشل تحميل الملف");
+    const text = await res.text();
+
+    const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+    const valid = lines.some(line => {
+      const [u, p] = line.split(",").map(x => x.trim());
+      return u === user && p === pass;
+    });
+
+    if (valid) {
+     // ✅ هنا نضيف الكود بتاعك
+        localStorage.setItem("loggedIn", "true");
+        localStorage.setItem("loggedInUser", user);
+        window.location.href = "index.html";
+ 
+
+    } else {
+      err.textContent = "❌ اسم المستخدم أو كلمة المرور غير صحيحة";
+    }
+  } catch (e) {
+    console.error(e);
+    err.textContent = "⚠️ فشل تحميل بيانات الدخول";
+  }
+});
+</script>
+</body>
+</html>
