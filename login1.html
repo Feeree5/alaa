@@ -86,17 +86,26 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
      // ✅ هنا نضيف الكود بتاعك
         localStorage.setItem("loggedIn", "true");
         localStorage.setItem("loggedInUser", user);
+        document.getElementById("username").value = "";
+        document.getElementById("password").value = "";
         window.location.href = "index.html";
  
 
     } else {
       err.textContent = "❌ اسم المستخدم أو كلمة المرور غير صحيحة";
+      document.getElementById("username").value = "";
+      document.getElementById("password").value = "";
+
     }
   } catch (e) {
     console.error(e);
     err.textContent = "⚠️ فشل تحميل بيانات الدخول";
+    document.getElementById("username").value = "";
+    document.getElementById("password").value = "";
+
   }
 });
 </script>
 </body>
 </html>
+
